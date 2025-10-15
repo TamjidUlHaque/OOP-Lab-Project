@@ -1,0 +1,80 @@
+import java.util.*;
+
+interface Switchable {
+    void turnOn();
+    void turnOff();
+    default void showStatus() {
+        System.out.println("Switchable device");
+    }
+}
+
+interface Chargeable {
+    void charge();
+    default void showStatus() {
+        System.out.println("Chargeable device");
+    }
+}
+
+class SmartDevice implements Switchable, Chargeable {
+    private String name;
+
+    SmartDevice(String name) {
+        this.name = name;
+    }
+
+    public void turnOn() {
+        System.out.println(name + " is turned ON");
+    }
+
+    public void turnOff() {
+        System.out.println(name + " is turned OFF");
+    }
+
+    public void charge() {
+        System.out.println(name + " is charging");
+    }
+
+    public void showStatus() {
+        System.out.print(name + ": ");
+        Switchable.super.showStatus();
+        System.out.print(name + ": ");
+        Chargeable.super.showStatus();
+    }
+
+    public void operate(String mode) {
+        System.out.println(name + " operating in mode: " + mode);
+    }
+
+    public void operate(int overdrive) {
+        System.out.println(name + " operating in overdrive level: " + overdrive);
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        List<SmartDevice> devices = new ArrayList<>();
+
+        System.out.print("Enter number of devices: ");
+        int n = sc.nextInt();
+        sc.nextLine();
+
+        for (int i = 0; i < n; i++) {
+            System.out.print("Enter name of device " + (i + 1) + ": ");
+            String name = sc.nextLine();
+            devices.add(new SmartDevice(name));
+        }
+
+        for (SmartDevice device : devices) {
+            device.turnOn();
+            device.operate("Normal");
+            device.operate(2);
+            device.charge();
+            device.showStatus();
+            device.turnOff();
+            System.out.println();
+        }
+
+        sc.close();
+    }
+}
