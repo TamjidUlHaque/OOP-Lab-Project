@@ -1,0 +1,132 @@
+# OOP-Lab-Project 2
+import java.util.*;
+
+abstract class Analyzer {
+    public abstract void analyze();
+}
+
+class Student {
+    int id;
+    String name;
+    double cgpa;
+
+    public Student(int id, String name, double cgpa) throws InvalidCGPAException {
+        if (cgpa < 0 || cgpa > 4) {
+            throw new InvalidCGPAException("CGPA must be between 0 and 4");
+        }
+        this.id = id;
+        this.name = name;
+        this.cgpa = cgpa;
+    }
+}
+
+class InvalidCGPAException extends Exception {
+    public InvalidCGPAException(String msg) {
+        super(msg);
+    }
+}
+
+class NoDataFoundException extends Exception {
+    public NoDataFoundException(String msg) {
+        super(msg);
+    }
+}
+
+class DataLoadException extends Exception {
+    public DataLoadException(String msg, Throwable cause) {
+        super(msg, cause);
+    }
+}
+
+class ResultAnalyzer extends Analyzer {
+    Student[] students;
+
+    public ResultAnalyzer(Student[] students) {
+        this.students = students;
+    }
+
+    public Student findTopper() throws NoDataFoundException {
+        if (students == null || students.length == 0) {
+            throw new NoDataFoundException("No student data available");
+        }
+        Student topper = students[0];
+        for (Student s : students) {
+            if (s.cgpa > topper.cgpa) {
+                topper = s;
+            }
+        }
+        return topper;
+    }
+
+    public double calculateAverageCGPA() throws NoDataFoundException {
+        if (students == null || students.length == 0) {
+            throw new NoDataFoundException("No student data available");
+        }
+        double sum = 0;
+        for (Student s : students) {
+            sum += s.cgpa;
+        }
+        return sum / students.length;
+    }
+
+    public void displayResults() {
+        try {
+            Student topper = findTopper();
+            double avg = calculateAverageCGPA();
+            System.out.println("Topper: " + topper.name + " (CGPA: " + topper.cgpa + ")");
+            System.out.println("Average CGPA: " + avg);
+        } catch (NoDataFoundException e) {
+            System.err.println("Error: " + e.getMessage());
+        }
+    }
+
+    public void analyze() {
+        displayResults();
+    }
+}
+
+public class Main {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        List<Student> studentList = new ArrayList<>();
+
+        try {
+            System.out.print("Enter number of students: ");
+            int n = Integer.parseInt(sc.nextLine());
+
+            for (int i = 0; i < n; i++) {
+                try {
+                    System.out.println("Enter data for student " + (i + 1));
+                    System.out.print("ID: ");
+                    int id = Integer.parseInt(sc.nextLine());
+                    System.out.print("Name: ");
+                    String name = sc.nextLine();
+                    System.out.print("CGPA: ");
+                    double cgpa = Double.parseDouble(sc.nextLine());
+
+                    studentList.add(new Student(id, name, cgpa));
+                } catch (InvalidCGPAException e) {
+                    System.err.println("Invalid CGPA: " + e.getMessage());
+                } catch (Exception e) {
+                    System.err.println("Input error: " + e.getMessage());
+                }
+            }
+
+            Student[] students = studentList.toArray(new Student[0]);
+            ResultAnalyzer analyzer = new ResultAnalyzer(students);
+            analyzer.analyze();
+
+        } catch (Exception e) {
+            try {
+                throw new DataLoadException("Failed to load student data", e);
+            } catch (DataLoadException de) {
+                System.err.println("DataLoadException: " + de.getMessage());
+                System.err.println("Cause: " + de.getCause());
+            }
+        } finally {
+            System.out.println("End of analysis");
+        }
+
+        sc.close();
+    }
+}
